@@ -78,8 +78,4 @@ int main(int ac, char **av)
     } else
         return 84;
     return 0;
-    printf("");
-    printf("");
-    printf("");
-    printf("");
 }
