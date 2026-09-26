@@ -77,5 +77,7 @@ int main(int ac, char **av)
         free_tab(tab); free(file);
     } else
         return 84;
-    return 0;
+    return 0;    
 }
+
+
