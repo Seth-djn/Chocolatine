@@ -1,0 +1,57 @@
+name: chocolatine
+
+on: [push, pull_request]
+  branches_ignore:
+    - 'no-ga/**'
+
+env:
+  EXECUTABLES: "my_sokoban"
+
+jobs:
+  check_compilation_and_coding_style:
+    runs-on: ubuntu-latest
+    container:
+      image: epitechcontent/epitest-docker
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Launch banana-check-repo
+        run:
+          banana-check-repo
+
+      - name: Compile files
+        timeout-minutes: 2
+        run:
+          make
+
+      - name: Displays coding style errors
+        run: |
+          if [ -f coding-style-reports.log ]; then
+            while IFS=: read -r file line_nb rest; do
+              error_type=${rest%%:*}
+              echo "::error file=$file,line=$line_nb::$error_type coding style error"
+            done < coding-style-reports.log
+          fi
+      
+      - name: Exit with error if coding style errors exist
+        run: |
+          if [ -f coding-style-reports.log ]; then
+            exit 1
+          fi
+      
+      - name: Clean up
+        run: |
+          make fclean
+
+      - name: Check Executables
+        run: |
+          echo "Checking executables..."
+          while IFS=; read ${EXECUTABLE}; do
+            if [ ! -f "$EXECUTABLE" ]; then
+              echo "::error file=$EXECUTABLE::Executable not found"
+              exit 1
+            fi
+          done <<< "$EXECUTABLES"
+          
