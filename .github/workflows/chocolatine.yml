@@ -7,7 +7,7 @@ on:
     branches-ignore: "no-ga/**"
     
 env:
-  EXECUTABLES: "my_sokoban"
+  EXECUTABLES: "hangman"
 
 jobs:
   check_compilation_and_coding_style:
