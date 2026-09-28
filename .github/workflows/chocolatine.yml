@@ -21,7 +21,7 @@ jobs:
 
       - name: Launch banana-check-repo
         run:
-          banana-check-repo
+          check.sh $(pwd) $(pwd)
 
       - name: Compile files
         timeout-minutes: 2
