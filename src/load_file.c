@@ -7,10 +7,11 @@
 
 #include "../includes/hangman.h"
 
-int check_file(char *file){
-    for (int i = 0;file[i];i++) {
+int check_file(char *file)
+{
+    for (int i = 0; file[i]; i++) {
         if (file[i] == ' ')
-         exit (84);
+            exit (84);
     }
 }
 
