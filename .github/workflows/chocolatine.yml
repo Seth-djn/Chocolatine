@@ -21,7 +21,7 @@ jobs:
 
       - name: Launch banana-check-repo
         run:
-          banana-check-repo $(pwd) $(pwd)
+          banana-check-repo . .
 
       - name: Compile files
         timeout-minutes: 2
@@ -42,18 +42,18 @@ jobs:
           if [ -f coding-style-reports.log ]; then
             exit 1
           fi
-      
-      - name: Clean up
-        run: |
-          make fclean
 
       - name: Check Executables
         run: |
           echo "Checking executables..."
-          while IFS=; read ${EXECUTABLE}; do
-            if [ ! -f "$EXECUTABLE" ]; then
-              echo "::error file=$EXECUTABLE::Executable not found"
+          IFS=',' 
+          for executable in ${EXECUTABLES}; do
+            if [ ! -f "$executable" ]; then
+              echo "::error file=$executable::Executable not found"
               exit 1
             fi
           done <<< "$EXECUTABLES"
           
+      - name: Clean up
+        run: |
+          make fclean
