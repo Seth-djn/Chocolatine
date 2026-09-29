@@ -2,33 +2,43 @@ name: chocolatine
 
 on:
   push:
-    branches-ignore: "no-ga/**"
+    branches-ignore:
+      - "no-ga/**"
+
   pull_request:
-    branches-ignore: "no-ga/**"
-    
+    branches-ignore:
+      - "no-ga/**"
+
 env:
+  MIRROR_SSH_URL: "git@github.com:YOUR_ORG/YOUR_MIRROR_REPO.git"
   EXECUTABLES: "hangman"
 
 jobs:
+
   check_compilation_and_coding_style:
+    # if: ${{ !contains(env.MIRROR_SSH_URL, github.repository) && !startsWith(github.head_ref || github.ref_name, 'no-ga/') }}
+
     runs-on: ubuntu-latest
+
     container:
       image: epitechcontent/epitest-docker
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 1
 
-      - name: Launch banana-check-repo
-        run:
-          banana-check-repo . .
+      - name: Run repository checks
+        run: banana-check-repo $(pwd) $(pwd)
 
-      - name: Compile files
+      - name: Compile project
         timeout-minutes: 2
-        run:
-          make
+        env:
+          CC: epiclang
+        run: make
 
-      - name: Displays coding style errors
+      - name: Display coding style errors
         run: |
           if [ -f coding-style-reports.log ]; then
             while IFS=: read -r file line_nb rest; do
@@ -36,24 +46,29 @@ jobs:
               echo "::error file=$file,line=$line_nb::$error_type coding style error"
             done < coding-style-reports.log
           fi
-      
-      - name: Exit with error if coding style errors exist
+
+      - name: Fail on coding style errors
         run: |
           if [ -f coding-style-reports.log ]; then
             exit 1
           fi
 
-      - name: Check Executables
+      - name: Check executables
         run: |
           echo "Checking executables..."
-          IFS=',' 
-          for executable in ${EXECUTABLES}; do
+
+          IFS=','
+          for executable in $EXECUTABLES; do
             if [ ! -f "$executable" ]; then
               echo "::error file=$executable::Executable not found"
               exit 1
             fi
-          done <<< "$EXECUTABLES"
+
+            if [ ! -x "$executable" ]; then
+              echo "::error file=$executable::File is not executable"
+              exit 1
+            fi
+          done
           
-      - name: Clean up
-        run: |
-          make fclean
+      - name: Clean project
+        run: make clean
